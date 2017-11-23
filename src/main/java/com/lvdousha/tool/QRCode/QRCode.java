@@ -1,16 +1,19 @@
 package com.lvdousha.tool.QRCode;
 
+import java.awt.AlphaComposite;
 import java.awt.Color;
 import java.awt.Graphics2D;
 import java.awt.Image;
+import java.awt.Rectangle;
+import java.awt.RenderingHints;
+import java.awt.Transparency;
 import java.awt.geom.AffineTransform;
+import java.awt.geom.Ellipse2D;
 import java.awt.image.AffineTransformOp;
 import java.awt.image.BufferedImage;
 import java.io.File;
 import java.io.IOException;
-import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 
 import javax.imageio.ImageIO;
@@ -26,7 +29,7 @@ import com.google.zxing.qrcode.decoder.ErrorCorrectionLevel;
 
 public class QRCode {
 
-	private Logger log = Logger.getRootLogger();
+	private static Logger log = Logger.getRootLogger();
 	
 	public static void main(String[] args) throws Exception {
 		String text = "zhenchanin+3310211993022kkxxxx+男+18823423789"; // 二维码内容
@@ -68,7 +71,7 @@ public class QRCode {
 				srcPixels[i][j] = scaleImage.getRGB(i, j);
 			}
 		}
-		Map<EncodeHintType, Object> hint = new HashMap<>();
+		Map<EncodeHintType, Object> hint = new HashMap<EncodeHintType, Object>();
 		hint.put(EncodeHintType.CHARACTER_SET, "utf-8");
 		hint.put(EncodeHintType.ERROR_CORRECTION, ErrorCorrectionLevel.H);
 		// 生成二维码
@@ -114,15 +117,65 @@ public class QRCode {
 					pixels[y * WIDTH + x] = matrix.get(x, y) ? colorInt : 16777215;
 					// 0x000000:0xffffff
 				}
+				if(x<26 || x>274 || y<26 || y>274){
+					if(x%4 == 0){
+						pixels[y * WIDTH + x] = 0xffff0000;
+					}else{
+						pixels[y * WIDTH + x] = 0xffffffff;
+					}
+				}
+				if((x-150)*(x-150)+(y-150)*(y-150)>125*125*2){
+						pixels[y * WIDTH + x] = 0xff00ff00;
+				}
 			}
 		}
-		BufferedImage image = new BufferedImage(WIDTH, HEIGHT, BufferedImage.TYPE_INT_RGB);
-		image.getRaster().setDataElements(0, 0, WIDTH, HEIGHT, pixels);
-		return image;
+//		BufferedImage image = new BufferedImage(WIDTH, HEIGHT, BufferedImage.TYPE_INT_RGB);
+//		image.getRaster().setDataElements(0, 0, WIDTH, HEIGHT, pixels);
+		
+		int realWidth = matrix.getEnclosingRectangle()[2];
+		int realHeight = matrix.getEnclosingRectangle()[3];
+		BufferedImage bi1 = new BufferedImage(WIDTH, HEIGHT, BufferedImage.TYPE_INT_RGB);
+		bi1.getRaster().setDataElements(0, 0, WIDTH, HEIGHT, pixels);
+		//这种是黑色底的  
+		Double w = new Double(realWidth*Math.sqrt(2));
+		Double h = new Double(realHeight*Math.sqrt(2));
+//	    BufferedImage bi2 = new BufferedImage(w.intValue(),h.intValue(),BufferedImage.TYPE_INT_RGB);   
+	      
+	    //透明底的图片  
+	    BufferedImage bi2 = new BufferedImage(bi1.getWidth(),bi1.getHeight(),BufferedImage.TYPE_INT_ARGB);   
+	    Ellipse2D.Double shape = new Ellipse2D.Double(0,0,w.intValue(),h.intValue());    
+//	    Ellipse2D.Double shape = new Ellipse2D.Double((int)(w-300)/2,(int)(h-300)/2,400,400);  
+	    Graphics2D g2 = bi2.createGraphics();  
+	    bi2 = g2.getDeviceConfiguration().createCompatibleImage(w.intValue(),h.intValue(), Transparency.TRANSLUCENT);
+	    g2.dispose();
+        g2 = bi2.createGraphics();
+//	    g2 = bi2.createGraphics();
+	    g2.fill(new Rectangle(w.intValue(), h.intValue())); 
+//	    g2.setClip(shape);   
+//	    g2.setBackground(Color.GREEN);  
+//	    g2.setComposite(AlphaComposite.Clear);
+	    g2.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
+	    g2.fillRoundRect(0, 0,w.intValue(), h.intValue(), 360, 360);
+	    g2.setComposite(AlphaComposite.SrcIn);
+	    // 使用 setRenderingHint 设置抗锯齿  
+	    g2.drawImage(bi1,(int)(w-bi1.getWidth())/2,(int)(h-bi1.getHeight())/2,null);   
+	    //设置颜色  
+	    g2.dispose();  
+	    
+//	    int[] c = new int[w.intValue()*h.intValue()];
+//	    bi2.getRaster().getPixels(0, 0, w.intValue(), h.intValue(), c);
+//	    for (int y = 0; y < h.intValue(); y++) {
+//			for (int x = 0; x < w.intValue(); x++) {
+//				
+//			}
+//	    }
+	    return bi2;
+		
+//		return image;
 	}
 
 	public static BufferedImage genBarcode(String content) throws WriterException, IOException {
-		Map<EncodeHintType, Object> hint = new HashMap<>();
+		Map<EncodeHintType, Object> hint = new HashMap<EncodeHintType, Object>();
 		hint.put(EncodeHintType.CHARACTER_SET, "utf-8");
 		hint.put(EncodeHintType.ERROR_CORRECTION, ErrorCorrectionLevel.H);
 		// 生成二维码
