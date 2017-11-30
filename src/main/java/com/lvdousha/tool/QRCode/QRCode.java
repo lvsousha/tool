@@ -78,13 +78,14 @@ public class QRCode {
 		MultiFormatWriter mutiWriter = new MultiFormatWriter();
 		BitMatrix matrix = mutiWriter.encode(content, BarcodeFormat.QR_CODE, WIDTH, HEIGHT, hint);
 		// 二维矩阵转为一维像素数组
+		log.info(matrix.getHeight()+"*"+matrix.getWidth());
 		int halfW = matrix.getWidth() / 2;
 		int halfH = matrix.getHeight() / 2;
 		int[] pixels = new int[WIDTH * HEIGHT];
 		for (int y = 0; y < matrix.getHeight(); y++) {
 			for (int x = 0; x < matrix.getWidth(); x++) {
 				// 左上角颜色,根据自己需要调整颜色范围和颜色
-				if (x > 0 && x < 100 && y > 0 && y < 100) {
+				if (x > 26 && x < 100 && y > 26 && y < 100) {
 					Color color = new Color(231, 144, 56);
 					int colorInt = color.getRGB();
 					pixels[y * WIDTH + x] = matrix.get(x, y) ? colorInt : 16777215;
@@ -108,70 +109,68 @@ public class QRCode {
 					// 在图片四周形成边框
 				} else {
 					// 二维码颜色
-					int num1 = (int) (50 - (50.0 - 13.0) / matrix.getHeight() * (y + 1));
-					int num2 = (int) (165 - (165.0 - 72.0) / matrix.getHeight() * (y + 1));
-					int num3 = (int) (162 - (162.0 - 107.0) / matrix.getHeight() * (y + 1));
+					int num1 = (int) (100 - (50.0 - 6.0) / matrix.getHeight() * (y + 1));
+					int num2 = (int) (165 - (165.0 - 50.0) / matrix.getHeight() * (y + 1));
+					int num3 = (int) (255 - (162.0 - 110.0) / matrix.getHeight() * (y + 1));
 					Color color = new Color(num1, num2, num3);
 					int colorInt = color.getRGB();
 					// 此处可以修改二维码的颜色，可以分别制定二维码和背景的颜色；
 					pixels[y * WIDTH + x] = matrix.get(x, y) ? colorInt : 16777215;
 					// 0x000000:0xffffff
+					addStyle2(x, y, pixels, matrix);
+					
 				}
-				if(x<26 || x>274 || y<26 || y>274){
-					if(x%4 == 0){
-						pixels[y * WIDTH + x] = 0xffff0000;
-					}else{
-						pixels[y * WIDTH + x] = 0xffffffff;
-					}
-				}
-				if((x-150)*(x-150)+(y-150)*(y-150)>125*125*2){
-						pixels[y * WIDTH + x] = 0xff00ff00;
-				}
+				
+//				if((y==10 && x>6 && x<100) 
+//						|| (y>6 && y<100 && x==10)
+//						|| (y==285 && x>200 && x<292)
+//						|| (y>200 && y<292 && x==285)){
+//					pixels[y * WIDTH + x] = 0xff00ff00;
+//				}
+				
 			}
 		}
-//		BufferedImage image = new BufferedImage(WIDTH, HEIGHT, BufferedImage.TYPE_INT_RGB);
-//		image.getRaster().setDataElements(0, 0, WIDTH, HEIGHT, pixels);
+		BufferedImage image = new BufferedImage(WIDTH, HEIGHT, BufferedImage.TYPE_INT_RGB);
+		image.getRaster().setDataElements(0, 0, WIDTH, HEIGHT, pixels);
 		
-		int realWidth = matrix.getEnclosingRectangle()[2];
-		int realHeight = matrix.getEnclosingRectangle()[3];
-		BufferedImage bi1 = new BufferedImage(WIDTH, HEIGHT, BufferedImage.TYPE_INT_RGB);
-		bi1.getRaster().setDataElements(0, 0, WIDTH, HEIGHT, pixels);
-		//这种是黑色底的  
-		Double w = new Double(realWidth*Math.sqrt(2));
-		Double h = new Double(realHeight*Math.sqrt(2));
-//	    BufferedImage bi2 = new BufferedImage(w.intValue(),h.intValue(),BufferedImage.TYPE_INT_RGB);   
-	      
-	    //透明底的图片  
-	    BufferedImage bi2 = new BufferedImage(bi1.getWidth(),bi1.getHeight(),BufferedImage.TYPE_INT_ARGB);   
-	    Ellipse2D.Double shape = new Ellipse2D.Double(0,0,w.intValue(),h.intValue());    
-//	    Ellipse2D.Double shape = new Ellipse2D.Double((int)(w-300)/2,(int)(h-300)/2,400,400);  
-	    Graphics2D g2 = bi2.createGraphics();  
-	    bi2 = g2.getDeviceConfiguration().createCompatibleImage(w.intValue(),h.intValue(), Transparency.TRANSLUCENT);
-	    g2.dispose();
-        g2 = bi2.createGraphics();
-//	    g2 = bi2.createGraphics();
-	    g2.fill(new Rectangle(w.intValue(), h.intValue())); 
-//	    g2.setClip(shape);   
-//	    g2.setBackground(Color.GREEN);  
-//	    g2.setComposite(AlphaComposite.Clear);
-	    g2.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
-	    g2.fillRoundRect(0, 0,w.intValue(), h.intValue(), 360, 360);
-	    g2.setComposite(AlphaComposite.SrcIn);
-	    // 使用 setRenderingHint 设置抗锯齿  
-	    g2.drawImage(bi1,(int)(w-bi1.getWidth())/2,(int)(h-bi1.getHeight())/2,null);   
-	    //设置颜色  
-	    g2.dispose();  
-	    
-//	    int[] c = new int[w.intValue()*h.intValue()];
-//	    bi2.getRaster().getPixels(0, 0, w.intValue(), h.intValue(), c);
-//	    for (int y = 0; y < h.intValue(); y++) {
-//			for (int x = 0; x < w.intValue(); x++) {
-//				
-//			}
-//	    }
-	    return bi2;
 		
-//		return image;
+		return image;
+	}
+	
+	public static void addStyle1(int x, int y, int[] pixels, BitMatrix matrix){
+		int num1 = (int) (50 - (50.0 - 13.0) / matrix.getHeight() * (y + 1));
+		int num2 = (int) (165 - (165.0 - 72.0) / matrix.getHeight() * (y + 1));
+		int num3 = (int) (162 - (162.0 - 107.0) / matrix.getHeight() * (y + 1));
+		Color color = new Color(num1, num2, num3);
+		int colorInt = color.getRGB();
+		if(x<26 || x>274 || y<26 || y>274){
+			if((Math.pow(x-150, 2)+Math.pow(y-150, 2))>Math.pow(140, 2) 
+					&& (Math.pow(x-150, 2)+Math.pow(y-150, 2))<Math.pow(144, 2) ){
+				pixels[y * WIDTH + x] = colorInt;
+			}
+		}
+	}
+	
+	public static void addStyle2(int x, int y, int[] pixels, BitMatrix matrix){
+		int num1 = (int) (50 - (50.0 - 13.0) / matrix.getHeight() * (y + 1));
+		int num2 = (int) (165 - (165.0 - 72.0) / matrix.getHeight() * (y + 1));
+		int num3 = (int) (162 - (162.0 - 107.0) / matrix.getHeight() * (y + 1));
+		Color color = new Color(num1, num2, num3);
+		int colorInt = color.getRGB();
+		if(x<26 || x>274 || y<26 || y>274){
+			if((x>20 && (x%8==0 || x%8==1 || x%8==2 || x%8==3) && y>10 && y<14 && x<290)
+					||(x>20 && (x%8==0 || x%8==1 || x%8==2 || x%8==3) && y>282 && y<286 && x<290)
+					||(x>10 && (x%8==0 || x%8==1 || x%8==2 || x%8==3) && y>16 && y<20 && x<280)
+					||(x>10 && (x%8==0 || x%8==1 || x%8==2 || x%8==3) && y>276 && y<280 && x<280)
+					
+					||(y>20 && (y%8==0 || y%8==1 || y%8==2 || y%8==3) && x>10 && x<14 && y<290)
+					||(y>20 && (y%8==0 || y%8==1 || y%8==2 || y%8==3) && x>282 && x<286 && y<290)
+					||(y>10 && (y%8==0 || y%8==1 || y%8==2 || y%8==3) && x>16 && x<20 && y<280)
+					||(y>10 && (y%8==0 || y%8==1 || y%8==2 || y%8==3) && x>276 && x<280 && y<280)
+					){
+				pixels[y * WIDTH + x] = colorInt;
+			}
+		}
 	}
 
 	public static BufferedImage genBarcode(String content) throws WriterException, IOException {
