@@ -67,10 +67,17 @@ public class QRCode {
 		Map<EncodeHintType, Object> hint = new HashMap<EncodeHintType, Object>();
 		hint.put(EncodeHintType.CHARACTER_SET, "utf-8");
 		hint.put(EncodeHintType.ERROR_CORRECTION, ErrorCorrectionLevel.H);
-		hint.put(EncodeHintType.QR_VERSION, 30);
+//		hint.put(EncodeHintType.QR_VERSION, 20);
+		
+		
 		// 生成二维码
 		MultiFormatWriter mutiWriter = new MultiFormatWriter();
 		BitMatrix matrix = mutiWriter.encode(content, BarcodeFormat.QR_CODE, 300, 300, hint);
+
+		Map<EncodeHintType, Object> hint2 = new HashMap<EncodeHintType, Object>();
+		hint.put(EncodeHintType.CHARACTER_SET, "utf-8");
+		hint.put(EncodeHintType.ERROR_CORRECTION, 200);
+		BitMatrix matrix2 = mutiWriter.encode(content, BarcodeFormat.AZTEC, 300, 300, hint2);
 		matrix = deleteWhite(matrix);
 		
 		int WIDTH = matrix.getWidth();
@@ -81,6 +88,9 @@ public class QRCode {
 		int IMAGE_HALF_WIDTH = IMAGE_WIDTH / 2;
 		BufferedImage scaleImage = scale(srcImagePath, IMAGE_WIDTH, IMAGE_HEIGHT, true);
 		int[][] srcPixels = new int[IMAGE_WIDTH][IMAGE_HEIGHT];
+		
+		BufferedImage buffImg = ImageIO.read(new File(System.getProperty("user.dir")+"/src/main/resources/back8.jpg"));
+		
 		for (int i = 0; i < scaleImage.getWidth(); i++) {
 			for (int j = 0; j < scaleImage.getHeight(); j++) {
 				srcPixels[i][j] = scaleImage.getRGB(i, j);
@@ -94,13 +104,14 @@ public class QRCode {
 		for (int y = 0; y < matrix.getHeight(); y++) {
 			for (int x = 0; x < matrix.getWidth(); x++) {
 				// 左上角颜色,根据自己需要调整颜色范围和颜色
-				if (x > 0 && x < 70 && y > 0 && y < 70) {
-					Color color = new Color(231, 144, 56);
-					int colorInt = color.getRGB();
-					pixels[y * WIDTH + x] = matrix.get(x, y) ? colorInt : 16777215;
-				}
-				// 读取图片
-				else if (x > halfW - IMAGE_HALF_WIDTH && x < halfW + IMAGE_HALF_WIDTH && y > halfH - IMAGE_HALF_WIDTH
+//				if (x > 0 && x < 70 && y > 0 && y < 70) {
+//					Color color = new Color(231, 144, 56);
+//					int colorInt = color.getRGB();
+//					pixels[y * WIDTH + x] = matrix.get(x, y) ? colorInt : 16777215;
+//				}
+//				// 读取图片
+//				else 
+					if (x > halfW - IMAGE_HALF_WIDTH && x < halfW + IMAGE_HALF_WIDTH && y > halfH - IMAGE_HALF_WIDTH
 						&& y < halfH + IMAGE_HALF_WIDTH) {
 					pixels[y * WIDTH + x] = srcPixels[x - halfW + IMAGE_HALF_WIDTH][y - halfH + IMAGE_HALF_WIDTH];
 				} else if ((x > halfW - IMAGE_HALF_WIDTH - FRAME_WIDTH && x < halfW - IMAGE_HALF_WIDTH + FRAME_WIDTH
@@ -124,16 +135,48 @@ public class QRCode {
 					Color color = new Color(num1, num2, num3);
 					int colorInt = color.getRGB();
 					// 此处可以修改二维码的颜色，可以分别制定二维码和背景的颜色；
-					pixels[y * WIDTH + x] = matrix.get(x, y) ? colorInt : 16777215;
+					pixels[y * WIDTH + x] = matrix.get(x, y) ? colorInt : buffImg.getRGB(x, y);
+					
+//					Object data = buffImg.getRaster().getDataElements(x, y, null);
+//					int red = buffImg.getColorModel().getRed(data);  
+//					int green = buffImg.getColorModel().getGreen(data);
+//					int blue = buffImg.getColorModel().getBlue(data);  
+//					Color backColor = new Color(red, green, blue);
+//					int level = (int)(red * 0.299 + green * 0.587 + blue * 0.114);
+//					if(level > 200){
+//						pixels[y * WIDTH + x] = matrix.get(x, y) ? colorInt : buffImg.getRGB(x, y);
+//					}else{
+//						System.out.println(level);
+//						pixels[y * WIDTH + x] = matrix.get(x, y) ? buffImg.getRGB(x, y) : colorInt;
+//					}
 					// 0x000000:0xffffff
 				}
 //				addStyle2(x, y, pixels, matrix);
+				if(x<26 || x>274 || y<26 || y>274){
+						
+//					int num1 = (int) (100 - (50.0 - 6.0) / matrix.getHeight() * (y + 1));
+//					int num2 = (int) (165 - (165.0 - 50.0) / matrix.getHeight() * (y + 1));
+//					int num3 = (int) (255 - (162.0 - 110.0) / matrix.getHeight() * (y + 1));
+//					Color color = new Color(num1, num2, num3);
+//					int colorInt = color.getRGB();
+					Object data = buffImg.getRaster().getDataElements(x, y, null);
+					int red = buffImg.getColorModel().getRed(data);  
+					int green = buffImg.getColorModel().getGreen(data);
+					int blue = buffImg.getColorModel().getBlue(data);  
+					Color backColor = new Color(red, green, blue);
+//					System.out.println(backColor.getRGB());
+//					System.out.println(colorInt);
+//					int backColorInt = backColor.getRGB();
+					pixels[y * 300 + x] = buffImg.getRGB(x, y);
+				}
 			}
 		}
 		BufferedImage image = new BufferedImage(matrix.getWidth(), matrix.getHeight(), BufferedImage.TYPE_INT_RGB);
 		image.getRaster().setDataElements(0, 0, matrix.getWidth(), matrix.getHeight(), pixels);
 		
-		BufferedImage buffImg = ImageIO.read(new File("d:\\back1.jpg"));
+		
+
+//		buffImg.get
 		
 		Graphics2D g2d = buffImg.createGraphics();
 		        int waterImgWidth = image.getWidth();// 获取层图的宽度
@@ -142,7 +185,7 @@ public class QRCode {
 		        g2d.setComposite(AlphaComposite.getInstance(AlphaComposite.SRC_ATOP, 0.9f));
 		        g2d.drawImage(image, 26, 26, waterImgWidth, waterImgHeight, null);
 		        g2d.dispose();
-		return buffImg;
+		return image;
 	}
 	
 	
@@ -163,7 +206,7 @@ public class QRCode {
 	
 	public static BitMatrix deleteWhite(BitMatrix matrix){  
 	    int[] rec = matrix.getEnclosingRectangle();
-	    for(int i : matrix.getBottomRightOnBit()){
+	    for(int i : matrix.getEnclosingRectangle()){
 	    	System.out.println(i);
 	    }
 	    int resWidth = rec[2] + 1;  
