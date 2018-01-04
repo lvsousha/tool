@@ -9,9 +9,12 @@ import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashMap;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.TreeMap;
 
+import org.apache.commons.io.FileUtils;
 import org.apache.poi.hssf.usermodel.HSSFCell;
 import org.apache.poi.hssf.usermodel.HSSFDateUtil;
 import org.apache.poi.hssf.usermodel.HSSFWorkbook;
@@ -21,6 +24,8 @@ import org.apache.poi.ss.usermodel.Sheet;
 import org.apache.poi.ss.usermodel.Workbook;
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 
+import com.alibaba.fastjson.JSONArray;
+import com.alibaba.fastjson.JSONObject;
 import com.itextpdf.text.Document;
 import com.itextpdf.text.Element;
 import com.itextpdf.text.Font;
@@ -34,11 +39,73 @@ public class Excel2Pdf {
 
 	public static void main(String[] args) throws Exception {
 		// TODO Auto-generated method stub
-		String source = "E:/office2pdf/execl/excel.xlsx";
-		String target = "E:/office2pdf/pdf/excel.pdf";
-		File file = new File(source);
+//		String source = "E:/office2pdf/execl/excel.xlsx";
+//		String target = "E:/office2pdf/pdf/excel.pdf";
+//		File file = new File(source);
 		Excel2Pdf ep = new Excel2Pdf();
-		ep.excel2pdf(file,target);
+//		ep.excel2pdf(file,target);
+		File file = new File("d:\\仲裁法new.xls");
+//		List<String> lines = FileUtils.readLines(file, "GBK");
+		Map<String,Map<String,Map<String,Map<String,String>>>> titles = new TreeMap<>();
+//		String[] contents = {};
+		Map<Integer, List<String>> lines = ep.readExcelContent(file.getPath());
+		for(Integer row : lines.keySet()){
+			List<String> contents = lines.get(row);
+			System.out.println(contents);
+			String a = contents.get(0);
+			String b = contents.get(1);
+			String c = contents.get(2);
+			String d = contents.get(3);
+			String e = contents.get(4);
+			
+			
+			Map<String,Map<String,Map<String,String>>> zhangs = titles.get(a);
+			if(zhangs == null){
+				zhangs = new LinkedHashMap<>();
+				titles.put(a, zhangs);
+			}
+			Map<String,Map<String,String>> jies = zhangs.get(b);
+			if(jies == null){
+				jies = new LinkedHashMap<>();
+				zhangs.put(b, jies);
+			}
+			Map<String,String> tiaos = jies.get(c);
+			if(tiaos == null){
+				tiaos = new LinkedHashMap<>();
+				jies.put(c, tiaos);
+			}
+			tiaos.put(d, e);
+		}
+		JSONArray array = new JSONArray();
+		for(String title : titles.keySet()){
+			JSONObject a = new JSONObject();
+			JSONArray zhangs = new JSONArray();
+			a.put("name", title);
+			a.put("child", zhangs);
+			array.add(a);
+			for(String zhang : titles.get(title).keySet()){
+				JSONObject b  = new JSONObject();
+				JSONArray jies = new JSONArray();
+				b.put("name", zhang);
+				b.put("child", jies);
+				zhangs.add(b);
+				for(String jie : titles.get(title).get(zhang).keySet()){
+					JSONObject c  = new JSONObject();
+					JSONArray tiaos = new JSONArray();
+					c.put("name", jie);
+					c.put("child", tiaos);
+					jies.add(c);
+					for(String tiao : titles.get(title).get(zhang).get(jie).keySet()){
+						JSONObject d  = new JSONObject();
+						d.put("name", tiao);
+						d.put("content", titles.get(title).get(zhang).get(jie).get(tiao));
+						tiaos.add(d);
+					}
+				}
+			}
+		}
+		FileUtils.writeStringToFile(new File("d:\\test.json"), array.toString(), "utf-8");
+		
 	}
 	
 	public String excel2pdf(File file, String target) throws Exception{
