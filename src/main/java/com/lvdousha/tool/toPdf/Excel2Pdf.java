@@ -44,67 +44,89 @@ public class Excel2Pdf {
 //		File file = new File(source);
 		Excel2Pdf ep = new Excel2Pdf();
 //		ep.excel2pdf(file,target);
-		File file = new File("d:\\仲裁法new.xls");
+//		File file = new File("/JSON/source/仲裁法规.xls");
+		File fold = new File("/JSON/source2/");
 //		List<String> lines = FileUtils.readLines(file, "GBK");
-		Map<String,Map<String,Map<String,Map<String,String>>>> titles = new TreeMap<>();
-//		String[] contents = {};
-		Map<Integer, List<String>> lines = ep.readExcelContent(file.getPath());
-		for(Integer row : lines.keySet()){
-			List<String> contents = lines.get(row);
-			System.out.println(contents);
-			String a = contents.get(0);
-			String b = contents.get(1);
-			String c = contents.get(2);
-			String d = contents.get(3);
-			String e = contents.get(4);
-			
-			
-			Map<String,Map<String,Map<String,String>>> zhangs = titles.get(a);
-			if(zhangs == null){
-				zhangs = new LinkedHashMap<>();
-				titles.put(a, zhangs);
+		for(File file : fold.listFiles()){
+			Map<String,Map<String,Map<String,Map<String,String>>>> titles = new TreeMap<>();
+			Map<Integer, List<String>> lines = ep.readExcelContent(file.getPath());
+			for(Integer row : lines.keySet()){
+				List<String> contents = lines.get(row);
+				System.out.println(contents.size());
+				
+				String a = contents.get(0);
+				String b = contents.get(1);
+				String c = contents.get(2);
+				String d = contents.get(3);
+				String e = contents.get(4);
+				
+				if(contents.size() == 5){
+					if(row == 0){
+						continue;
+					}
+					a = contents.get(0);
+					b = contents.get(1);
+					c = contents.get(2);
+					d = contents.get(3);
+					e = contents.get(4);
+				}else{
+					a = contents.get(0);
+					b = contents.get(2);
+					c = contents.get(3);
+					d = contents.get(4);
+					e = contents.get(5);
+				}
+				
+				
+				Map<String,Map<String,Map<String,String>>> zhangs = titles.get(a);
+				if(zhangs == null){
+					zhangs = new LinkedHashMap<>();
+					titles.put(a, zhangs);
+				}
+				Map<String,Map<String,String>> jies = zhangs.get(b);
+				if(jies == null){
+					jies = new LinkedHashMap<>();
+					zhangs.put(b, jies);
+				}
+				Map<String,String> tiaos = jies.get(c);
+				if(tiaos == null){
+					tiaos = new LinkedHashMap<>();
+					jies.put(c, tiaos);
+				}
+				tiaos.put(d, e);
 			}
-			Map<String,Map<String,String>> jies = zhangs.get(b);
-			if(jies == null){
-				jies = new LinkedHashMap<>();
-				zhangs.put(b, jies);
-			}
-			Map<String,String> tiaos = jies.get(c);
-			if(tiaos == null){
-				tiaos = new LinkedHashMap<>();
-				jies.put(c, tiaos);
-			}
-			tiaos.put(d, e);
-		}
-		JSONArray array = new JSONArray();
-		for(String title : titles.keySet()){
-			JSONObject a = new JSONObject();
-			JSONArray zhangs = new JSONArray();
-			a.put("name", title);
-			a.put("child", zhangs);
-			array.add(a);
-			for(String zhang : titles.get(title).keySet()){
-				JSONObject b  = new JSONObject();
-				JSONArray jies = new JSONArray();
-				b.put("name", zhang);
-				b.put("child", jies);
-				zhangs.add(b);
-				for(String jie : titles.get(title).get(zhang).keySet()){
-					JSONObject c  = new JSONObject();
-					JSONArray tiaos = new JSONArray();
-					c.put("name", jie);
-					c.put("child", tiaos);
-					jies.add(c);
-					for(String tiao : titles.get(title).get(zhang).get(jie).keySet()){
-						JSONObject d  = new JSONObject();
-						d.put("name", tiao);
-						d.put("content", titles.get(title).get(zhang).get(jie).get(tiao));
-						tiaos.add(d);
+			JSONArray array = new JSONArray();
+			for(String title : titles.keySet()){
+				JSONObject a = new JSONObject();
+				JSONArray zhangs = new JSONArray();
+				a.put("name", title);
+				a.put("child", zhangs);
+				array.add(a);
+				for(String zhang : titles.get(title).keySet()){
+					JSONObject b  = new JSONObject();
+					JSONArray jies = new JSONArray();
+					b.put("name", zhang);
+					b.put("child", jies);
+					zhangs.add(b);
+					for(String jie : titles.get(title).get(zhang).keySet()){
+						JSONObject c  = new JSONObject();
+						JSONArray tiaos = new JSONArray();
+						c.put("name", jie);
+						c.put("child", tiaos);
+						jies.add(c);
+						for(String tiao : titles.get(title).get(zhang).get(jie).keySet()){
+							JSONObject d  = new JSONObject();
+							d.put("name", tiao);
+							d.put("content", titles.get(title).get(zhang).get(jie).get(tiao));
+							tiaos.add(d);
+						}
 					}
 				}
+				FileUtils.writeStringToFile(new File("/JSON/20180105/"+title+".json"), a.toString(), "utf-8");
+				
 			}
+			
 		}
-		FileUtils.writeStringToFile(new File("d:\\test.json"), array.toString(), "utf-8");
 		
 	}
 	
