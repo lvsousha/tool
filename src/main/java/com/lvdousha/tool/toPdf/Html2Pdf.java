@@ -38,7 +38,8 @@ public class Html2Pdf {
         fontResolver.addFont("E:/office2pdf/font/simsun.ttf", BaseFont.IDENTITY_H, BaseFont.NOT_EMBEDDED);     
         fontResolver.addFont("E:/office2pdf/font/simsun.ttc", BaseFont.IDENTITY_H, BaseFont.NOT_EMBEDDED);    
         //解决图片的相对路径问题    windows 路径
-        imagespath = "file:/"+imagespath.replaceAll("\\\\", "/")+"/";
+        imagespath = "file:///"+imagespath.replaceAll("\\\\", "/")+"/";
+        System.out.println(imagespath);
         //解决图片的相对路径问题   相对路径
 //        imagespath = imagespath.replaceAll("\\\\", "/")+"/";
         renderer.getSharedContext().setBaseURL(imagespath);  

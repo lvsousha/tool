@@ -32,8 +32,8 @@ import org.w3c.dom.Document;
 public class Word2Pdf {
 	public static void main(String[] args) throws Throwable {
 		Word2Pdf wp = new Word2Pdf();
-		String path = "E:/office2pdf/nanjing/java笔试重要知识点深度解析.doc";
-		File file = new File(path);
+		String fold = System.getProperty("user.dir");
+		File file = new File(fold+"/src/main/resources/source/test.docx");
 		wp.word2pdf(file, "e:/office2pdf/pdf/word/");
 	}
 
@@ -51,6 +51,7 @@ public class Word2Pdf {
 		try{
 			doc2html(file, targetFold.getPath(),imagesFold.getPath(), fileName.substring(0,fileName.indexOf("."))+".html");
 		}catch(Exception e){
+			e.printStackTrace();
 			docx2html(file, targetFold.getPath(),imagesFold.getPath(), fileName.substring(0,fileName.indexOf("."))+".html");
 		}
 		Html2Pdf.html2Pdf(

@@ -36,7 +36,7 @@ public class Word2Pdf {
 		Word2Pdf wp = new Word2Pdf();
 //		String path = "E:/office2pdf/nanjing/java笔试重要知识点深度解析.doc";
 		String fold = System.getProperty("user.dir");
-		String source = fold+"/src/main/resources/source/仲裁法规整理201712月29日.docx";
+		String source = fold+"/src/main/resources/source/test.docx";
 		File file = new File(source);
 		wp.word2pdf(file, "e:/office2pdf/pdf/word/");
 	}

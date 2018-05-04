@@ -9,7 +9,6 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.text.SimpleDateFormat;
-import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 
@@ -40,13 +39,11 @@ public class Word2Html {
 	public static void main(String[] args) throws IOException{
 		Word2Html w2h = new Word2Html();
 		String fold = System.getProperty("user.dir");
-		String source = fold+"/src/main/resources/source/中华人民共和国保险法.docx";
-		String target = fold+"/src/main/resources/target";
+		String target = fold+"/target";
 //		File file = new File(source);
 		File foldFile = new File(fold+"/src/main/resources/source/");
-		List<String> sourceFiles = new ArrayList<>();
 		for(File file : foldFile.listFiles()){
-			if(file.getName().lastIndexOf("docx") == -1){
+			if(file.getName().lastIndexOf("docx") == -1 && file.getName().lastIndexOf("doc") == -1){
 				continue;
 			}
 			String name = file.getName().substring(0,file.getName().lastIndexOf("."));
@@ -58,23 +55,11 @@ public class Word2Html {
 				try {
 					w2h.doc2html(file, target, target+"/images", name+".html");
 				} catch (Exception e1) {
+					e1.printStackTrace();
 					System.out.println(file.getName());
 					continue;
 				}
 			}
-			File sourceFile = new File(target+"/"+name+".html");
-			String content = FileUtils.readFileToString(sourceFile, "utf-8");
-//			System.out.println(content);
-			JSONObject json = new JSONObject();
-			json.put("neirong", content);
-			json.put("title", name);
-			json.put("anhao", name);
-			SimpleDateFormat sdf  = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
-			json.put("created_time", sdf.format(new Date()));
-			FileUtils.writeStringToFile(new File(fold+"/src/main/resources/JSON/"+name+".json"), json.toString(), "UTF-8");
-			break;
-			
-			
 		}
 	}
 	
