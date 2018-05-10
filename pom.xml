@@ -27,12 +27,12 @@
 			<artifactId>jodconverter</artifactId>
 			<version>2.2.1</version>
 		</dependency>
-<dependency>
-    <groupId>org.artofsolving.jodconverter</groupId>
-    <artifactId>jodconverter-core</artifactId>
-    <version>3.0-beta-4</version>
-    <!--使用Maven导入不成功，这个库是手动导入的-->
-  </dependency>
+		<dependency>
+			<groupId>org.artofsolving.jodconverter</groupId>
+			<artifactId>jodconverter-core</artifactId>
+			<version>3.0-beta-4</version>
+			<!--使用Maven导入不成功，这个库是手动导入的 -->
+		</dependency>
 
 
 		<dependency>
@@ -55,11 +55,20 @@
 			<artifactId>unoil</artifactId>
 			<version>3.2.1</version>
 		</dependency>
-<!--jodconverter2.2.1必须依赖slf4j-jdk14必须这个版本，不然源码中日志会报错，很low的一个问题-->  
-        <dependency>  
-            <groupId>org.slf4j</groupId>  
-            <artifactId>slf4j-jdk14</artifactId>  
-            <version>1.4.3</version>  
-        </dependency> 
+		<!--jodconverter2.2.1必须依赖slf4j-jdk14必须这个版本，不然源码中日志会报错，很low的一个问题 -->
+		<dependency>
+			<groupId>org.slf4j</groupId>
+			<artifactId>slf4j-jdk14</artifactId>
+			<version>1.4.3</version>
+		</dependency>
+
+		<!-- https://mvnrepository.com/artifact/org.freemarker/freemarker -->
+		<dependency>
+			<groupId>org.freemarker</groupId>
+			<artifactId>freemarker</artifactId>
+			<version>2.3.23</version>
+		</dependency>
+
+
 	</dependencies>
 </project>
